@@ -1,0 +1,5 @@
+build/
+*.vpk
+*.velf
+*.self
+eboot.bin
