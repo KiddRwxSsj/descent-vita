@@ -23,7 +23,7 @@ The following files are required:
 - `descent.hog` — contains the game's levels and other game resources.
 - `descent.pig` — contains the textures, graphics, and other assets needed by the game.
 
-Both files must come from the same release. The shareware version (v1.4) is confirmed to work, while the registered versions (v1.4 and v1.5) have not yet been tested on hardware.
+Both files must come from the same release. The shareware version (v1.4) and the full v1.5 release (the one sold on GOG, just copy `DESCENT.HOG` and `DESCENT.PIG` from the install folder) both work on hardware. The game checks which one you have when it starts, so the same VPK handles either.
 
 **Optional:** `music.sf2` — a General MIDI SoundFont used for music playback. Place it in the same directory. Without it, the game runs without music.
 
@@ -40,7 +40,7 @@ Additional command-line arguments can be specified in `args.txt`, and fatal erro
 
 ## Current status
 
-The shareware version (v1.4) is fully playable and has been tested on real PS Vita hardware and runs at 60 FPS with no issues. The registered versions (v1.4 and v1.5) compile, but haven't been tested yet.
+The shareware version (v1.4) is fully playable and has been tested on real PS Vita hardware and runs at 60 FPS with no issues. The full game (v1.5, GOG release) now boots and plays on hardware as well. It hasn't been played through to the end yet, so later levels, the end sequence and add-on missions are still untested.
 Network multiplayer isn't supported at the moment. The original game relied on IPX networking, which hasn't been implemented in this port.
 
 
@@ -87,11 +87,11 @@ You'll need [VitaSDK](https://vitasdk.org) with `vita2d` installed. From the pro
 export VITASDK=/usr/local/vitasdk
 export PATH=$VITASDK/bin:$PATH
 
-cmake -S . -B build -DD1_SHAREWARE=ON
+cmake -S . -B build
 cmake --build build
 ```
 
-The build produces `build/descent.vpk`. The `-DD1_SHAREWARE=ON` option enables the shareware build; leave it out to build for the registered release instead.
+The build produces `build/descent.vpk`. The game is compiled twice, once for the full release (`eboot.bin`) and once for the shareware data (`shareware.bin`), since the original code picks between them at compile time. Both end up in the same VPK, and `eboot.bin` switches over to `shareware.bin` on startup when it finds the shareware `descent.pig`.
 
 ## Changes to the original DOS source
 

@@ -15,8 +15,6 @@ set(VITA_APP_NAME "Descent ディセント")
 set(VITA_TITLEID  "DSCT00001")
 set(VITA_VERSION  "01.50")
 
-option(D1_SHAREWARE "Build for the shareware data set" OFF)
-
 # The tree came from DOS, so every header is upper case on disk while the code
 # includes them in lower case. Mirror them into one dir with lowercase links.
 set(INC_SHIM ${CMAKE_BINARY_DIR}/inc)
@@ -75,9 +73,6 @@ set(NET_SRCS
   MAIN/NETWORK.C MAIN/NETMISC.C MAIN/MODEM.C MAIN/MULTI.C MAIN/KMATRIX.C
   MAIN/MULTIBOT.C
 )
-if(NOT D1_SHAREWARE)
-  list(APPEND GAME_SRCS ${NET_SRCS})
-endif()
 
 set(VITA_SRCS
   VITA/VITAMAIN.C
@@ -95,51 +90,56 @@ set(VITA_SRCS
   VITA/STUBS.C
 )
 
-set_source_files_properties(${LIB_SRCS} ${GAME_SRCS} ${VITA_SRCS} PROPERTIES LANGUAGE C)
+set_source_files_properties(${LIB_SRCS} ${GAME_SRCS} ${NET_SRCS} ${VITA_SRCS} PROPERTIES LANGUAGE C)
 
-add_executable(descent ${LIB_SRCS} ${GAME_SRCS} ${VITA_SRCS})
+# SHAREWARE changes too much of the game to flip at runtime, so the vpk carries
+# both builds and the full one hands over to the shareware one when it sees that data
+add_executable(descent ${LIB_SRCS} ${GAME_SRCS} ${NET_SRCS} ${VITA_SRCS})
+target_compile_definitions(descent PRIVATE NETWORK)
 
-target_include_directories(descent PRIVATE ${CMAKE_SOURCE_DIR}/VITA/COMPAT ${INC_SHIM})
+add_executable(descent_sw ${LIB_SRCS} ${GAME_SRCS} ${VITA_SRCS})
+# no IPX on the vita and the shareware net code never caught up with 1.5
+target_compile_definitions(descent_sw PRIVATE SHAREWARE NO_NETWORK)
 
-target_compile_definitions(descent PRIVATE RELEASE NDEBUG __VITA__)
-if(D1_SHAREWARE)
-  # no IPX on the vita and the shareware net code never caught up with 1.5
-  target_compile_definitions(descent PRIVATE SHAREWARE NO_NETWORK)
-else()
-  target_compile_definitions(descent PRIVATE NETWORK)
-endif()
+foreach(t descent descent_sw)
+  target_include_directories(${t} PRIVATE ${CMAKE_SOURCE_DIR}/VITA/COMPAT ${INC_SHIM})
 
-target_compile_options(descent PRIVATE
-  -x c -std=gnu11 -fpermissive -O2
-  # Watcom's char is unsigned and the whole tree leans on it (fonts, key tables, text)
-  -funsigned-char
-  -fno-strict-aliasing -fwrapv -fno-common
-  -include ${CMAKE_SOURCE_DIR}/VITA/COMPAT/prelude.h
-  -Wno-implicit-int -Wno-implicit-function-declaration -Wno-int-conversion
-  -Wno-incompatible-pointer-types -Wno-return-mismatch -Wno-unknown-pragmas
-  -Wno-pointer-sign -Wno-builtin-declaration-mismatch -Wno-multichar
-  -Wno-address-of-packed-member
-)
+  target_compile_definitions(${t} PRIVATE RELEASE NDEBUG __VITA__)
 
-target_link_libraries(descent
-  vita2d
-  m
-  SceGxm_stub
-  SceDisplay_stub
-  SceCtrl_stub
-  SceTouch_stub
-  SceAudio_stub
-  ScePower_stub
-  SceAppMgr_stub
-  SceAppUtil_stub
-  SceCommonDialog_stub
-  SceSysmodule_stub
-  pthread
-)
+  target_compile_options(${t} PRIVATE
+    -x c -std=gnu11 -fpermissive -O2
+    # Watcom's char is unsigned and the whole tree leans on it (fonts, key tables, text)
+    -funsigned-char
+    -fno-strict-aliasing -fwrapv -fno-common
+    -include ${CMAKE_SOURCE_DIR}/VITA/COMPAT/prelude.h
+    -Wno-implicit-int -Wno-implicit-function-declaration -Wno-int-conversion
+    -Wno-incompatible-pointer-types -Wno-return-mismatch -Wno-unknown-pragmas
+    -Wno-pointer-sign -Wno-builtin-declaration-mismatch -Wno-multichar
+    -Wno-address-of-packed-member
+  )
+
+  target_link_libraries(${t}
+    vita2d
+    m
+    SceGxm_stub
+    SceDisplay_stub
+    SceCtrl_stub
+    SceTouch_stub
+    SceAudio_stub
+    ScePower_stub
+    SceAppMgr_stub
+    SceAppUtil_stub
+    SceCommonDialog_stub
+    SceSysmodule_stub
+    pthread
+  )
+endforeach()
 
 vita_create_self(eboot.bin descent)
+vita_create_self(shareware.bin descent_sw)
 vita_create_vpk(descent.vpk ${VITA_TITLEID} eboot.bin
   VERSION ${VITA_VERSION}
   NAME ${VITA_APP_NAME}
   FILE ${CMAKE_SOURCE_DIR}/VITA/sce_sys sce_sys
+  FILE ${CMAKE_BINARY_DIR}/shareware.bin shareware.bin
 )

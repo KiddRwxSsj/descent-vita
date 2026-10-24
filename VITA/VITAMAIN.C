@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <unistd.h>
 
+#include <psp2/appmgr.h>
 #include <psp2/kernel/processmgr.h>
 #include <psp2/kernel/threadmgr.h>
 #include <psp2/io/stat.h>
@@ -51,6 +52,22 @@ static int read_args_file(int n)
 	return n;
 }
 
+#ifndef SHAREWARE
+// the full game's pig opens with the offset past its tables, the shareware one
+// goes straight into the bitmap count
+static int shareware_data(void)
+{
+	FILE *f = fopen("descent.pig", "rb");
+	int start = 0;
+
+	if (!f)
+		return 0;
+	fread(&start, sizeof(start), 1, f);
+	fclose(f);
+	return start > 0 && start < 0x10000;
+}
+#endif
+
 void vita_fatal(const char *msg)
 {
 	FILE *f = fopen(VITA_DATA_PATH "/error.log", "w");
@@ -75,6 +92,11 @@ int main(int argc, char **argv)
 
 	sceIoMkdir(VITA_DATA_PATH, 0777);
 	chdir(VITA_DATA_PATH);
+
+#ifndef SHAREWARE
+	if (shareware_data())
+		sceAppMgrLoadExec("app0:shareware.bin", NULL, NULL);
+#endif
 
 	args[n++] = "descent";
 	args[n++] = "-nodoscheck";
