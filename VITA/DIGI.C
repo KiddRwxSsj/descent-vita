@@ -93,6 +93,9 @@ int digi_xlat_sound(int soundno)
 		soundno = AltSounds[soundno];
 		if ( soundno == 255 ) return -1;
 	}
+	// the shareware tables leave some slots at 255 (weapon select is one). DOS read
+	// past the end of GameSounds and played junk, here the mixer faults on it
+	if ( Sounds[soundno] == 255 ) return -1;
 	return Sounds[soundno];
 }
 
