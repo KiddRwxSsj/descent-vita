@@ -25,7 +25,21 @@ The following files are required:
 
 Both files must come from the same release. The shareware version (v1.4) and the full v1.5 release (the one sold on GOG, just copy `DESCENT.HOG` and `DESCENT.PIG` from the install folder) both work on hardware. The game checks which one you have when it starts, so the same VPK handles either.
 
-**Optional:** `music.sf2` — a General MIDI SoundFont used for music playback. Place it in the same directory. Without it, the game runs without music.
+### Music (optional)
+
+The game data has no recorded music, only MIDI songs that DOS played through your sound card. There are two ways to get music on the Vita, and you can use either one or both. Without them the game runs fine, just silent.
+
+**Option 1: a SoundFont (`music.sf2`).** The port plays the original MIDI songs through a SoundFont synthesizer. The one it was tested with is GeneralUser GS:
+
+1. Go to https://github.com/mrbumpy409/GeneralUser-GS and download `GeneralUser-GS.sf2` (the file in the root of the repository, about 32 MB). Direct link: https://github.com/mrbumpy409/GeneralUser-GS/raw/main/GeneralUser-GS.sf2
+2. Rename it to `music.sf2`.
+3. Copy it to `ux0:data/descent/`.
+
+Any other General MIDI SoundFont works too, as long as it's named `music.sf2`. The whole SoundFont is loaded into memory (GeneralUser GS takes about 64 MB once loaded), so much bigger ones may not fit.
+
+**Option 2: a recorded soundtrack (`.dxa`).** The DXX-Rebirth soundtrack packs also work. They're recordings of the music played on real hardware, like the Roland SC-55 or the Sound Blaster AWE32. Download one of the Descent 1 packs (the ones starting with `d1`, or `D1X-ARACHNO.DXA`) from https://github.com/pudlez/dxx-addons/releases and copy the `.dxa` file as it is to `ux0:data/descent/`. Don't extract it, and only put one pack in the folder. A good one to start with is `d1xr-sc55-music.dxa`.
+
+Songs that aren't in the pack fall back to the SoundFont, if you have one. Some packs (like the PlayStation and Mac CD ones) only replace some of the songs. With the shareware data, the menu, briefing and credits music comes from the pack, but the level music is named differently in the shareware, so the levels use the SoundFont.
 
 Your directory should look like this:
 
@@ -33,14 +47,15 @@ Your directory should look like this:
 ux0:data/descent/
 ├── descent.hog
 ├── descent.pig
-└── music.sf2       (optional)
+├── music.sf2                (optional)
+└── d1xr-sc55-music.dxa      (optional, any one .dxa soundtrack pack)
 ```
 
 Additional command-line arguments can be specified in `args.txt`, and fatal errors are logged to `error.log` in the same directory.
 
 ## Current status
 
-The shareware version (v1.4) is fully playable and has been tested on real PS Vita hardware and runs at 60 FPS with no issues. The full game (v1.5, GOG release) now boots and plays on hardware as well. It hasn't been played through to the end yet, so later levels, the end sequence and add-on missions are still untested.
+The shareware version (v1.4) is fully playable and has been tested on real PS Vita hardware and runs at 60 FPS with no issues. The full game (v1.5, GOG release) also runs on hardware: all 27 levels, the secret levels and the ending have been tested. Add-on missions are still untested.
 Network multiplayer isn't supported at the moment. The original game relied on IPX networking, which hasn't been implemented in this port.
 
 
@@ -48,13 +63,13 @@ Network multiplayer isn't supported at the moment. The original game relied on I
 
 The port includes both original 4:3 and stretched display modes, optional smooth scaling, and a choice between 30 and 60 FPS caps. Controls are adapted for the Vita's twin sticks, with independent axis inversion, and nearly every button can be remapped. Both halves of the rear touchpad are also configurable.
 
-Text input uses the Vita's system keyboard, while sound effects are handled by a custom mixer and MIDI music is played through a SoundFont synthesizer. Pilot profiles, settings, and save files are stored alongside the game data.
+Text input uses the Vita's system keyboard, while sound effects are handled by a custom mixer and MIDI music is played through a SoundFont synthesizer, or replaced by a recorded DXX-Rebirth soundtrack pack. Pilot profiles, settings, and save files are stored alongside the game data.
 
 ## Installation
 
 Install `Descent ディセント.vpk` using VitaShell, then copy the required game files to `ux0:data/descent/`.
 
-You'll need `descent.hog` and `descent.pig` from either the shareware or registered release. Music is optional: place a General MIDI SoundFont named `music.sf2` in the same directory to enable it.
+You'll need `descent.hog` and `descent.pig` from either the shareware or registered release. Music is optional, see [Music](#music-optional) above for where to get `music.sf2` or a `.dxa` soundtrack pack.
 
 You can also put additional command-line arguments in `ux0:data/descent/args.txt`. If the game encounters a fatal error, it writes the details to `ux0:data/descent/error.log`.
 
@@ -107,7 +122,7 @@ There are also a couple of changes to the audio pipeline. Sounds in the sharewar
 
 The original Descent source code was released by Parallax Software. See `README.TXT` for its license. Game data files are not included with this project and remain the property of their respective owners.
 
-Music playback uses [TinySoundFont](https://github.com/schellingb/TinySoundFont) by Bernhard Schelling, under the MIT license (`VITA/TSF.H`). The HMP file layout and shareware sound decoder are based on information and implementations from [DXX-Rebirth](https://github.com/dxx-rebirth/dxx-rebirth).
+Music playback uses [TinySoundFont](https://github.com/schellingb/TinySoundFont) by Bernhard Schelling, under the MIT license (`VITA/TSF.H`). Recorded soundtracks are decoded with [stb_vorbis](https://github.com/nothings/stb) by Sean Barrett, public domain or MIT (`VITA/VORBIS.H`). The HMP file layout and shareware sound decoder are based on information and implementations from [DXX-Rebirth](https://github.com/dxx-rebirth/dxx-rebirth), and the `.dxa` soundtrack format comes from the same project.
 
 Testing was also carried out with the [GeneralUser GS](https://github.com/mrbumpy409/GeneralUser-GS) SoundFont by S. Christian Collins.
 

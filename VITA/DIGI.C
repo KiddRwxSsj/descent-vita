@@ -144,9 +144,11 @@ int digi_init()
 
 	digi_init_sounds();
 
-	// stands in for the SOS MIDI driver; no soundfont in the data folder, no music
-	if ( !music_ready )
+	// stands in for the SOS MIDI driver; no soundfont and no .dxa soundtrack in the data folder, no music
+	if ( !music_ready )	{
 		music_ready = music_init( "music.sf2" );
+		music_ready |= dxa_init();
+	}
 	digi_set_midi_volume( midi_volume );
 	digi_reset_digi_sounds();
 
@@ -340,6 +342,7 @@ void digi_set_volume( int dvolume, int mvolume )
 
 void digi_stop_current_song()
 {
+	dxa_stop();
 	music_stop();
 	if (SongData) 	{
 		free(SongData);
@@ -366,6 +369,9 @@ void digi_play_midi_song( char * filename, char * melodic_bank, char * drum_bank
 
 	if ( midi_volume < 1 )
 		return;				// Don't play song if volume == 0;
+
+	if ( dxa_play( filename, loop ) )
+		return;
 
 	fp = cfopen( filename, "rb" );
 	if (!fp) {

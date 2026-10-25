@@ -221,7 +221,9 @@ void music_mix(int *out, int frames)
 	int i, n;
 	float gain;
 
-	if (!synth || !playing || volume <= 0)
+	if (volume <= 0 || dxa_mix(out, frames, volume))
+		return;
+	if (!synth || !playing)
 		return;
 
 	sceKernelLockLwMutex(&music_lock, 1, NULL);

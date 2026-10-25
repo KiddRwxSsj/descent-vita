@@ -21,4 +21,9 @@ void music_stop(void);
 void music_set_volume(int volume);
 void music_mix(int *out, int frames);
 
+int dxa_init(void);
+int dxa_play(const char *filename, int loop);
+void dxa_stop(void);
+int dxa_mix(int *out, int frames, float volume);
+
 #endif

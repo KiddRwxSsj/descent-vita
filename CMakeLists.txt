@@ -79,6 +79,7 @@ set(VITA_SRCS
   VITA/VIDEO.C
   VITA/IME.C
   VITA/MUSIC.C
+  VITA/DXA.C
   VITA/KEY.C
   VITA/MOUSE.C
   VITA/JOY.C
@@ -131,6 +132,7 @@ foreach(t descent descent_sw)
     SceAppUtil_stub
     SceCommonDialog_stub
     SceSysmodule_stub
+    z
     pthread
   )
 endforeach()
